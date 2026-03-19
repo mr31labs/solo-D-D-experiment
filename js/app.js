@@ -9,6 +9,7 @@ const Storage = {
     },
     hasApiKey() { return !!this.loadData('apiKey'); },
     getApiKey() { return this.loadData('apiKey'); },
+    getModel() { return this.loadData('model') || 'gemini-2.5-flash'; },
     saveCharacter(charData) { this.saveData('character', charData); },
     loadCharacter() { return this.loadData('character'); }
 };
@@ -191,7 +192,8 @@ Keep narratives highly descriptive, engaging, but concise. Always end by prompti
     
     async sendMessage(message) {
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${this.apiKey}`, {
+            const modelName = Storage.getModel();
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${this.apiKey}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -234,15 +236,24 @@ function init() {
     if (!Storage.hasApiKey()) {
         document.getElementById('api-key-modal').classList.add('active');
         document.getElementById('app-container').classList.add('hidden');
+        document.getElementById('model-dropdown').value = Storage.getModel();
     } else {
         document.getElementById('api-key-modal').classList.remove('active');
         startGameShell();
     }
     
+    document.getElementById('settings-btn').addEventListener('click', () => {
+        document.getElementById('api-key-input').value = Storage.getApiKey() || '';
+        document.getElementById('model-dropdown').value = Storage.getModel();
+        document.getElementById('api-key-modal').classList.add('active');
+    });
+    
     document.getElementById('save-key-btn').addEventListener('click', () => {
         const key = document.getElementById('api-key-input').value.trim();
+        const model = document.getElementById('model-dropdown').value;
         if (key) {
             Storage.saveData('apiKey', key);
+            Storage.saveData('model', model);
             document.getElementById('api-key-modal').classList.remove('active');
             startGameShell();
         } else {
