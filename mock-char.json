@@ -1,0 +1,22 @@
+{
+  "character": {
+    "name": "Balthazar",
+    "baseHitPoints": 12,
+    "race": {"fullName": "Tiefling"},
+    "classes": [
+      {
+        "level": 3,
+        "definition": {"name": "Warlock"}
+      }
+    ],
+    "stats": [
+      {"id": 1, "value": 10},
+      {"id": 2, "value": 14},
+      {"id": 3, "value": 13},
+      {"id": 4, "value": 12},
+      {"id": 5, "value": 10},
+      {"id": 6, "value": 16}
+    ],
+    "bonusStats": []
+  }
+}
