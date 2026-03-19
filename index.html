@@ -103,9 +103,10 @@
                         <option value="dungeon_crawl">The Goblin Caves (Dungeon Crawl)</option>
                         <option value="wilderness">The Whispering Woods (Wilderness)</option>
                         <option value="mystery">Murder at the Prancing Pony (Mystery)</option>
-                        <option value="custom">Custom (Type your own)</option>
+                        <option value="custom">Upload Custom Adventure (.md)</option>
                     </select>
-                    <button id="start-scenario-btn" class="dnd-btn action-btn">Begin Adventure</button>
+                    <input type="file" id="custom-adventure-file" accept=".md,.txt" class="dnd-input hidden" style="margin-top: 10px;" />
+                    <button id="start-scenario-btn" class="dnd-btn action-btn" style="margin-top: 10px;">Begin Adventure</button>
                 </div>
                 
                 <div id="action-input-group" class="control-group hidden">

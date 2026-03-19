@@ -173,12 +173,20 @@ Keep narratives highly descriptive, engaging, but concise. Always end by prompti
 `;
     }
     
-    async initialize(scenario) {
+    async initialize(scenario, customText = null) {
         const apiKey = Storage.getApiKey();
         if (!apiKey) throw new Error("API Key missing");
         
         this.apiKey = apiKey;
-        return this.sendMessage(`The player has chosen the scenario: ${scenario}. Begin the adventure, describe the starting location vividly, and ask what they do.`);
+        
+        let startPrompt = `The player has chosen the scenario: ${scenario}. Begin the adventure, describe the starting location vividly, and ask what they do.`;
+        
+        if (customText) {
+            this.systemInstruction += `\n\n--- CUSTOM ADVENTURE MODULE BEGIN ---\n${customText}\n--- CUSTOM ADVENTURE MODULE END ---\n\nCRITICAL DIRECTIVE: You must run the exact story, characters, and encounters defined in the custom module above. Start the narrative exactly as the module begins.`;
+            startPrompt = `The player has provided a custom adventure module (see system instructions). Begin the adventure based precisely on the provided module text, describe the starting location vividly, and ask the player what they do.`;
+        }
+        
+        return this.sendMessage(startPrompt);
     }
     
     async sendMessage(message) {
@@ -255,6 +263,15 @@ function init() {
         }
     });
 
+    document.getElementById('scenario-dropdown').addEventListener('change', (e) => {
+        const fileInput = document.getElementById('custom-adventure-file');
+        if (e.target.value === 'custom') {
+            fileInput.classList.remove('hidden');
+        } else {
+            fileInput.classList.add('hidden');
+        }
+    });
+
     document.getElementById('start-scenario-btn').addEventListener('click', async () => {
         const scenario = document.getElementById('scenario-dropdown').value;
         if (!scenario) return;
@@ -264,14 +281,35 @@ function init() {
             return;
         }
 
+        let customText = null;
+        if (scenario === 'custom') {
+            const fileInput = document.getElementById('custom-adventure-file');
+            if (!fileInput.files.length) {
+                alert("Please select a .md or .txt custom adventure file!");
+                return;
+            }
+            
+            try {
+                customText = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(e.target.result);
+                    reader.onerror = e => reject(e);
+                    reader.readAsText(fileInput.files[0]);
+                });
+            } catch (err) {
+                alert("Failed to read the custom adventure file.");
+                return;
+            }
+        }
+
         document.getElementById('scenario-selector').classList.add('hidden');
         document.getElementById('action-input-group').classList.remove('hidden');
         
-        appendMessage("System", `Starting scenario: ${scenario}...`, 'system-message');
+        appendMessage("System", `Starting scenario...`, 'system-message');
         
         aiEngine = new AIEngine();
         try {
-            const response = await aiEngine.initialize(scenario);
+            const response = await aiEngine.initialize(scenario, customText);
             handleAIResponse(response);
         } catch (e) {
             appendMessage("Error", "Failed to contact Gemini API. Check your key.", 'system-message');
